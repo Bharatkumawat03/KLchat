@@ -90,7 +90,7 @@ const Chat = () => {
                 },
                 text,
                 status,
-                createdAt: new Date().toLocaleString()
+                createdAt: new Date().toISOString()
             }
             console.log(dd);
             dispatch(addMessage(dd));
@@ -146,6 +146,13 @@ const Chat = () => {
         {msgs?.map((msg,index) => {
             const isSentByUser = msg?.senderId?.firstName === user.firstName;
             const seenIconColor = msg.status === "seen" ? "#1E90FF" : "#6C757D";
+
+            const createdAtIST = new Date(msg.createdAt).toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
             return (
                 <div key={index} className={`chat ${isSentByUser ? "chat-end":"chat-start"} `}>
                     
@@ -153,7 +160,7 @@ const Chat = () => {
 
             </div>
             <div className="flex gap-1 chat-footer opacity-50">
-                <time className="text-xs opacity-50">{msg?.createdAt?.substring(11,16)}</time>
+                <time className="text-xs opacity-50">{createdAtIST}</time>
                 {isSentByUser ?<LiaCheckDoubleSolid  fill={seenIconColor} />: ""}
                 {/* <p>{isSentByUser ?msg.status: ""}</p> */}
             </div>
