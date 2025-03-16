@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getFirebaseToken } from '../utils/firebase';
 
 import logo from '../assets/sparky-dash-high-five.gif';
