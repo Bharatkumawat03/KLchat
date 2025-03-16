@@ -1,19 +1,65 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../componenets/Navbar'
 import Footer from '../componenets/Footer'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { useAuth0 } from "@auth0/auth0-react";
 import axios from 'axios';
 import { BASE_URL } from '../utils/constants';
 import { useDispatch, useSelector } from 'react-redux';
 import { addUser } from '../utils/userSlice';
 import { setFeed } from '../utils/feedSlice';
+import PushNotificationBanner from '../componenets/PushNotificationBanner';
+import { getMessaging, onMessage } from 'firebase/messaging';
+import { toast } from 'react-toastify';
 
 const Body = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     // const user = useSelector((store) => store.user);
     const user = localStorage.getItem("user");
+
+  const loc = useLocation();
+  const {targetUserName} = useParams();
+  const [currentChatUserName, setCurrentChatUserName] = useState(null);
+
+  useEffect(() => {
+    setCurrentChatUserName(targetUserName);
+  }, [loc, targetUserName]);
+
+  useEffect(() => {
+    const messaging = getMessaging();
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('Received foreground message: ', payload);
+      
+      console.log(currentChatUserName);
+      const { title } = payload.data;
+
+      console.log(title === currentChatUserName);
+      if(title === targetUserName) return ;
+      
+      toast(
+        <div>
+          <strong>{payload.data.title}</strong>
+          <br />
+          {payload.data.body}
+        </div>, {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClick: () => {
+            const link = payload.data.click_action;
+            window.location.href = link;
+          },
+        }
+      );
+    });
+  
+    return () => unsubscribe();
+  }, [currentChatUserName]); 
+
+
 
   const getUser = async () => {
     try {
@@ -28,6 +74,7 @@ const Body = () => {
   useEffect(() => {
     getUser();
   }, []);
+
 
   
   const getFeed = async () => {
@@ -50,27 +97,13 @@ const Body = () => {
     )
   },[]);
 
-  const loc = useLocation();
-  const params = useParams();
-  // console.log(loc);
-  useEffect(()=> {
-    const {targetUserId, targetUserName} = params
-    if(!targetUserId && !targetUserName){
-      // if(socket.connected){
-      //   console.log(params);
-      //   // socket.emit("disconnect");
-      //   socket.disconnect();
-      //   console.log("dissconnect")
-      // }
-      }
-  },[loc])
 
   return (
     <div>
         <Navbar />
+        <PushNotificationBanner />
         <div className='min-h-[82.5vh]'>
         <Outlet />
-
         </div>
         <Footer />
     </div>

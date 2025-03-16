@@ -3,20 +3,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, setMessage } from '../utils/chatSlice';
 import { createSocketConnection } from '../utils/socket';
 import axios from 'axios';
-import { BASE_URL } from '../utils/constants';
+import { BASE_URL, FRONTEND_BASE_URL } from '../utils/constants';
 import { useParams } from 'react-router-dom';
 import { LiaCheckDoubleSolid } from "react-icons/lia";
+import { sendPushNotification } from '../utils/notification';
 
 const Chat = () => {
     const [text, setText] = useState("");
     const dispatch = useDispatch();
     const {targetUserId, targetUserName} = useParams();
-    // const [senderId, setSenderId] = useState();
 
     const user = useSelector((store) => store.user);
     const userId = user?._id;
     const msgs = useSelector((store) => store.chat);
-    // console.log("hererer",msgs);
+    // console.log("here",msgs);
 
     const handleSendChat = async (e) => {
         e.preventDefault();
@@ -33,7 +33,11 @@ const Chat = () => {
             socket.emit("sendMessage",data, (res) => {
                 // console.log(res);
             });
-            
+
+            const username = user.firstName + " " + user.lastName;
+            const linkUrl = `${FRONTEND_BASE_URL}/chat/${userId}/${user.firstName + "%20" + user.lastName}`
+            sendPushNotification(targetUserId,username, text, linkUrl);
+
             // dispatch(addMessage(text));
             setText("");
             scrollToBottom()
@@ -72,6 +76,7 @@ const Chat = () => {
         msgsRef.current = msgs;
     }, [msgs]);
 
+
     useEffect(() => {
         if(!userId) return;
         const data = {
@@ -81,7 +86,7 @@ const Chat = () => {
         }
         const socket = createSocketConnection();
         socket.emit("joinChat",data)
-        console.log("join chat");
+        // console.log("join chat");
     
         socket.on("messageReceived", ({firstName, lastName, text, status}) =>{
             const dd = {
@@ -97,6 +102,9 @@ const Chat = () => {
             scrollToBottom()
 
             socket.emit("messageSeen", { userId, targetUserId });
+            // if(firstName !== user.firstName){
+            //     handleNewMessage(text)
+            // }
         })
 
 
@@ -115,7 +123,7 @@ const Chat = () => {
                     : msg
             );
         
-            console.log("Updated msgs", updatedMessages);
+            // console.log("Updated msgs", updatedMessages);
         
             if (updatedMessages.length > 0) {
                 dispatch(setMessage(updatedMessages));
@@ -127,7 +135,7 @@ const Chat = () => {
         
         return () => {
             socket.disconnect();
-            console.log("disconnected")
+            // console.log("disconnected")
         }
       },[userId, targetUserId]);
 

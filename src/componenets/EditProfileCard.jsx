@@ -15,7 +15,7 @@ const EditProfileCard = ({user}) => {
     const handleEdit = async () => {
         try {
             const res = await axios.patch(`${BASE_URL}/profile/edit`,{firstName,lastName,about,photoUrl}, {withCredentials: true});
-            console.log(res.data.data);
+            // console.log(res.data.data);
             dispatch(addUser(res.data.data));
             toast.success("Profile updated successfully !!");
             

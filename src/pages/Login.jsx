@@ -21,7 +21,7 @@ const Login = () => {
     try {
         const res = await axios.post(BASE_URL + "/signup", {firstName, lastName, emailId, password}, { withCredentials: true });
         dispatch(addUser(res.data));
-        console.log(res.data);
+        // console.log(res.data);
         navigate("/");
         toast.success("Login successfully !!")
     } catch (error) {

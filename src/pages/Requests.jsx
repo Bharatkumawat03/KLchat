@@ -1,12 +1,14 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { BASE_URL } from '../utils/constants'
+import { BASE_URL, FRONTEND_BASE_URL } from '../utils/constants'
 import { useDispatch, useSelector } from 'react-redux'
 import { removeRequest, setRequests } from '../utils/requestSlice'
+import { sendPushNotification } from '../utils/notification'
 
 const Requests = () => {
     // const [requests, setRequests] = useState([]);
     const requests  = useSelector(store => store.request);
+    const user = useSelector(store => store.user);
     const dispatch = useDispatch();
     const getRequests = async () => {
         try {
@@ -25,6 +27,13 @@ const Requests = () => {
         try {
             const res = await axios.post(`${BASE_URL}/request/review/${status}/${request._id}`, {}, {withCredentials: true});
             console.log(res);
+            if(status === "accepted"){
+                const title = "connection request accepted.";
+                const linkUrl = `${FRONTEND_BASE_URL}/connections`
+                const text = `${user.firstName + " " + user.lastName} accepted your connection request.`
+                const targetUserId = request.fromUserId._id;
+                sendPushNotification(targetUserId,title, text, linkUrl);
+            }
             dispatch(removeRequest(res.data.data._id))
         } catch (error) {
             console.log(error);
