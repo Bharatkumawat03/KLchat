@@ -15,36 +15,31 @@ const PushNotificationBanner = () => {
           console.log('Firebase token: ', firebaseToken);
           if(firebaseToken) setShowNotiBanner(false);
           })
-          .catch((err) => console.error('An error occured while retrieving firebase token. ', err))
+          .catch((err) => console.error('error while retrieving firebase token. ', err))
     }
 
-    const ToastifyNotification = ({title, body}) => {
-        <div className="push-notification">
-          <h2 className="push-notification-title text-blue-500">{title}</h2>
-          <p className="push-notification-text">{body}</p>
-        </div>
-    }
+    useEffect(() => {
+      if (Notification.permission === 'granted') {
+          setShowNotiBanner(false);
+      } else {
+        setShowNotiBanner(true);
+      }
+  }, []);
     
-
   return (
     <>
-    {user && <div className='app'>
-      { showNotiBanner && <div className='bg-primary text-white p-5 py-3 bg-opacity-80 notification-banner'>
-            <a href="#"
-          className="notification-banner-link"
-          onClick={handleGetFirebaseToken}>
-          The app need permission to enable push notifications.</a>
-        </div> }
-
-        {/* <img src={logo} className='app-logo' alt="logo" /> */}
-        {/* <button className='btn btn-primary' onClick={() => toast(<ToastifyNotification title="New Message" body="Hi there!" />)} >
-        Show toast notification</button> */}
-
-        
-      <ToastContainer hideProgressBar />
+    {user && <div>
+      { showNotiBanner && <div role="alert" className="alert alert-info alert-soft alert-vertical sm:alert-horizontal">
+          <span>Enable push notifications.</span>
+          <div>
+            <button onClick={handleGetFirebaseToken} className="btn btn-sm btn-primary">Enable</button>
+            <button onClick={() => setShowNotiBanner(false)} className="btn btn-sm btn-secondary">Cancel</button>
+          </div>
+        </div> 
+        }
     </div>}
             </>
   )
 }
 
-export default PushNotificationBanner
+export default PushNotificationBanner;
