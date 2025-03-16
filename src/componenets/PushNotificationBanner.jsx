@@ -29,10 +29,10 @@ const PushNotificationBanner = () => {
   return (
     <>
     {user && <div>
-      { showNotiBanner && <div role="alert" className="alert alert-info alert-soft alert-vertical sm:alert-horizontal">
+      {showNotiBanner && <div role="alert" className="alert flex justify-between px-10">
           <span>Enable push notifications.</span>
-          <div>
-            <button onClick={handleGetFirebaseToken} className="btn btn-sm btn-primary">Enable</button>
+          <div className=''>
+            <button onClick={handleGetFirebaseToken} className="btn btn-sm btn-primary mx-3">Enable</button>
             <button onClick={() => setShowNotiBanner(false)} className="btn btn-sm btn-secondary">Cancel</button>
           </div>
         </div> 
