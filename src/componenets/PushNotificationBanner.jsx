@@ -30,11 +30,10 @@ const PushNotificationBanner = () => {
     <>
     {user && <div className='app'>
       { showNotiBanner && <div className='bg-primary text-white p-5 py-3 bg-opacity-80 notification-banner'>
-            <span>The app need permission to </span>
             <a href="#"
           className="notification-banner-link"
           onClick={handleGetFirebaseToken}>
-           enable push notifications.</a>
+          The app need permission to enable push notifications.</a>
         </div> }
 
         {/* <img src={logo} className='app-logo' alt="logo" /> */}

@@ -61,7 +61,7 @@ self.addEventListener('notificationclick', function(event) {
                 }
                 
                 for (const client of clientList) {
-                    if (client.url.includes('localhost:5173') && 'focus' in client) {
+                    if (client.url.includes('klchat.onrender.com') && 'focus' in client) {
                         console.log('found existing client, focusing and navigating ', client);
                         return client.focus()
                             .then(() => {
