@@ -23,7 +23,7 @@ messaging.onBackgroundMessage((payload) => {
     const notificationOptions = { 
         // body: payload.notification.body,
         body: payload.data.body,
-        data: { click_action: payload.data?.click_action || 'http://localhost:5173/'},
+        data: { click_action: payload.data?.click_action || 'https://klchat.onrender.com'},
         // icon: payload.notification.icon
      };
   
