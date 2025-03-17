@@ -10,6 +10,7 @@ import { setFeed } from '../utils/feedSlice';
 import PushNotificationBanner from '../componenets/PushNotificationBanner';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import { toast } from 'react-toastify';
+import Cookies from 'js-cookie';
 
 const Body = () => {
     const navigate = useNavigate();
@@ -90,6 +91,20 @@ const Body = () => {
   useEffect(()=>{
     getFeed();
   },[user]);
+
+  
+  const checkAuth = () => {
+    const token = Cookies.get('token');
+    if (!token) {
+      localStorage.clear();
+      navigate("/login");
+    }
+  };
+
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
   
   useEffect(() => {
     if(!user)(

@@ -10,6 +10,7 @@ import Chat from "./componenets/Chat"
 import { useEffect } from "react"
 import { getOrRegisterServiceWorker, onForegroundMessage } from "./utils/firebase"
 
+
 function App() {
 
   useEffect(() => {
