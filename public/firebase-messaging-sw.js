@@ -25,19 +25,64 @@ messaging.onBackgroundMessage((payload) => {
         body: payload.data.body,
         data: { click_action: payload.data?.click_action || 'https://klchat.onrender.com'},
         // icon: payload.notification.icon
+        icon: "/klicon.png"
      };
   
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
+
+const CACHE_NAME = "klchat-cache-v1";
+const ASSETS_TO_CACHE = ["/", "/index.html", "/manifest.json", "/static/js/bundle.js"];
+
 self.addEventListener('install', (event) => {
-    console.log('service worker installed, skipping waiting');
+    console.log('Service Worker Installed');
+    
+    event.waitUntil(
+        caches.open(CACHE_NAME).then((cache) => {
+            return cache.addAll(ASSETS_TO_CACHE);
+        })
+    );
+
     self.skipWaiting();
 });
 
+// Activate event (Cleaning old caches)
 self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
+    console.log('Service Worker Activated');
+
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all(
+                cacheNames.map((cache) => {
+                    if (cache !== CACHE_NAME) {
+                        console.log('Deleting old cache:', cache);
+                        return caches.delete(cache);
+                    }
+                })
+            );
+        })
+    );
+
+    self.clients.claim();
 });
+
+self.addEventListener('fetch', (event) => {
+    event.respondWith(
+        caches.match(event.request).then((response) => {
+            return response || fetch(event.request);
+        })
+    );
+});
+
+// self.addEventListener('install', (event) => {
+//     console.log('service worker installed, skipping waiting');
+//     self.skipWaiting();
+// });
+
+// self.addEventListener('activate', (event) => {
+//     event.waitUntil(self.clients.claim());
+// });
 
 
 self.addEventListener('notificationclick', function(event) {
@@ -81,3 +126,23 @@ self.addEventListener('notificationclick', function(event) {
             })
     );
 });
+
+
+
+// for pwa
+
+// self.addEventListener('install', (event) => {
+//     event.waitUntil(
+//         caches.open('my-cache').then((cache) => {
+//             return cache.addAll(['/', '/index.html', '/manifest.json'])
+//         })
+//     )
+// })
+
+// self.addEventListener('fetch', (event) => {
+//     event.respondWith(
+//         caches.match(event.request).then((response) => {
+//             return response || fetch(event.request);
+//         })
+//     )
+// })

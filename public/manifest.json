@@ -1,0 +1,39 @@
+{
+    "short_name": "KLChat",
+    "name": "KLChat Progressive Web App",
+    "start_url": "/",
+    "display": "standalone",
+    "theme_color": "#ffffff",
+    "background_color": "#ffffff",
+    "icons": [
+        {
+            "src": "/chat.png",
+            "type": "image/png",
+            "sizes": "600x600"
+        },
+        {
+            "src": "/chat.png",
+            "type": "image/png",
+            "sizes": "600x600"
+        },
+        {
+            "src": "/gchat.webp",
+            "type": "image/webp",
+            "sizes": "980x980"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshot.png",
+            "type": "image/png",
+            "form_factor": "wide",
+            "sizes": "1871x960"
+        }, 
+        {
+            "src": "/mobile.png",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "sizes": "465x745"
+        }
+    ]
+}

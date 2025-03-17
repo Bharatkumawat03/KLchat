@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import { useSelector } from 'react-redux';
 
 const PushNotificationBanner = () => {
+
     const user = useSelector(store => store.user);
     const [showNotiBanner, setShowNotiBanner] = useState(Notification.permission === 'default');
 
