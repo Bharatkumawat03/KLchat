@@ -97,7 +97,6 @@ const Body = () => {
     const token = Cookies.get('token');
     if (!token) {
       localStorage.clear();
-      navigate("/login");
     }
   };
 
