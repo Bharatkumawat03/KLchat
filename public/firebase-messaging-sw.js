@@ -33,7 +33,7 @@ messaging.onBackgroundMessage((payload) => {
 
 
 const CACHE_NAME = "klchat-cache-v1";
-const ASSETS_TO_CACHE = ["/", "/index.html", "/manifest.json", "/static/js/bundle.js"];
+const ASSETS_TO_CACHE = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener('install', (event) => {
     console.log('Service Worker Installed');
@@ -47,7 +47,6 @@ self.addEventListener('install', (event) => {
     self.skipWaiting();
 });
 
-// Activate event (Cleaning old caches)
 self.addEventListener('activate', (event) => {
     console.log('Service Worker Activated');
 
