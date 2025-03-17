@@ -10,22 +10,44 @@ const PushNotificationBanner = () => {
     const user = useSelector(store => store.user);
     const [showNotiBanner, setShowNotiBanner] = useState(Notification.permission === 'default');
 
-    const handleGetFirebaseToken = () => {
-        getFirebaseToken()
-          .then((firebaseToken) => {
-          console.log('Firebase token: ', firebaseToken);
-          if(firebaseToken) setShowNotiBanner(false);
-          })
-          .catch((err) => console.error('error while retrieving firebase token. ', err))
-    }
+    // const handleGetFirebaseToken = () => {
+    //     getFirebaseToken()
+    //       .then((firebaseToken) => {
+    //       console.log('Firebase token: ', firebaseToken);
+    //       if(firebaseToken) setShowNotiBanner(false);
+    //       })
+    //       .catch((err) => console.error('error while retrieving firebase token. ', err))
+    // }
+
+
+    const handleGetFirebaseToken = async () => {
+      try {
+          const firebaseToken = await getFirebaseToken();
+          if (firebaseToken) {
+              setShowNotiBanner(false);
+          } else {
+              console.error("Failed to get Firebase token.");
+          }
+      } catch (err) {
+          console.error('Error while retrieving Firebase token:', err);
+      }
+    };
+
 
     useEffect(() => {
-      if (Notification.permission === 'granted') {
-          setShowNotiBanner(false);
-      } else {
-        setShowNotiBanner(true);
+      if(Notification.permission === 'granted'){
+        handleGetFirebaseToken();
       }
-  }, []);
+    },[]);
+  
+
+  //   useEffect(() => {
+  //     if (Notification.permission === 'granted') {
+  //         setShowNotiBanner(false);
+  //     } else {
+  //       setShowNotiBanner(true);
+  //     }
+  // }, []);
     
   return (
     <>

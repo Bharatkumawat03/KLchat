@@ -54,34 +54,69 @@ export const getOrRegisterServiceWorker = async () => {
 };
 
 
-export const getFirebaseToken = () => {
-    getOrRegisterServiceWorker()
-        .then((serviceWorkerRegistration) => {
-            if (!serviceWorkerRegistration) {
-                console.error('Service worker registration failed.');
-                return;
-            }
-            getToken(messaging, {
-                vapidKey: import.meta.env.VITE_REACT_APP_VAPID_KEY,
-                serviceWorkerRegistration
-            })
-                .then(async (token) => {
-                    console.log('Firebase token:', token);
 
-                    if(token){
-                       const res = await axios.post(`${BASE_URL}/save-token`,{fcmToken: token},{withCredentials: true});
-                       console.log(res.data);
-                        // dispatch(addUser(res.data));
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error getting Firebase token:', error);
-                });
-        })
-        .catch((error) => {
-            console.error('Error registering service worker:', error);
+export const getFirebaseToken = async () => {
+    try {
+        const serviceWorkerRegistration = await getOrRegisterServiceWorker();
+
+        if (!serviceWorkerRegistration) {
+            console.error('Service worker registration failed.');
+            return null;
+        }
+
+        const token = await getToken(messaging, {
+            vapidKey: import.meta.env.VITE_REACT_APP_VAPID_KEY,
+            serviceWorkerRegistration
         });
+
+        if (!token) {
+            console.error('No Firebase token received.');
+            return null;
+        }
+
+        console.log('Firebase token:', token);
+
+        // Send token to backend
+        const res = await axios.post(`${BASE_URL}/save-token`, { fcmToken: token }, { withCredentials: true });
+        console.log('Token saved:', res.data);
+
+        return token;  // Important! Now you can use this token
+    } catch (error) {
+        console.error('Error getting Firebase token:', error);
+        return null;
+    }
 };
+
+
+
+// export const getFirebaseToken = () => {
+//     getOrRegisterServiceWorker()
+//         .then((serviceWorkerRegistration) => {
+//             if (!serviceWorkerRegistration) {
+//                 console.error('Service worker registration failed.');
+//                 return;
+//             }
+//             getToken(messaging, {
+//                 vapidKey: import.meta.env.VITE_REACT_APP_VAPID_KEY,
+//                 serviceWorkerRegistration
+//             })
+//                 .then(async (token) => {
+//                     console.log('Firebase token:', token);
+
+//                     if(token){
+//                        const res = await axios.post(`${BASE_URL}/save-token`,{fcmToken: token},{withCredentials: true});
+//                        console.log(res.data);
+//                         // dispatch(addUser(res.data));
+//                     }
+//                 })
+//                 .catch((error) => {
+//                     console.error('Error getting Firebase token:', error);
+//                 });
+//         })
+//         .catch((error) => {
+//             console.error('Error registering service worker:', error);
+//         });
+// };
 
 
 export const onForegroundMessage = () =>
