@@ -36,7 +36,7 @@ const CACHE_NAME = "klchat-cache-v1";
 const ASSETS_TO_CACHE = ["/", "/index.html", "/manifest.json"];
 
 self.addEventListener('install', (event) => {
-    console.log('Service Worker Installed');
+    // console.log('service Worker installed');
     
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
@@ -75,7 +75,7 @@ self.addEventListener('fetch', (event) => {
 });
 
 // self.addEventListener('install', (event) => {
-//     console.log('service worker installed, skipping waiting');
+//     console.log('service worker installed, skip waiting');
 //     self.skipWaiting();
 // });
 

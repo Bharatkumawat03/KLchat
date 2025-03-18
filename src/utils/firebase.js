@@ -60,7 +60,7 @@ export const getFirebaseToken = async () => {
         const serviceWorkerRegistration = await getOrRegisterServiceWorker();
 
         if (!serviceWorkerRegistration) {
-            console.error('Service worker registration failed.');
+            console.error('service worker registration failed');
             return null;
         }
 
@@ -70,19 +70,18 @@ export const getFirebaseToken = async () => {
         });
 
         if (!token) {
-            console.error('No Firebase token received.');
+            console.error('no firebase token available');
             return null;
         }
 
-        console.log('Firebase token:', token);
+        console.log('firebase token ', token);
 
-        // Send token to backend
         const res = await axios.post(`${BASE_URL}/save-token`, { fcmToken: token }, { withCredentials: true });
         console.log('Token saved:', res.data);
 
-        return token;  // Important! Now you can use this token
+        return token;
     } catch (error) {
-        console.error('Error getting Firebase token:', error);
+        console.error('error getting Firebase token ', error);
         return null;
     }
 };
@@ -93,7 +92,7 @@ export const getFirebaseToken = async () => {
 //     getOrRegisterServiceWorker()
 //         .then((serviceWorkerRegistration) => {
 //             if (!serviceWorkerRegistration) {
-//                 console.error('Service worker registration failed.');
+//                 console.error('service worker registration failed');
 //                 return;
 //             }
 //             getToken(messaging, {
@@ -101,7 +100,7 @@ export const getFirebaseToken = async () => {
 //                 serviceWorkerRegistration
 //             })
 //                 .then(async (token) => {
-//                     console.log('Firebase token:', token);
+//                     console.log('firebase token ', token);
 
 //                     if(token){
 //                        const res = await axios.post(`${BASE_URL}/save-token`,{fcmToken: token},{withCredentials: true});
@@ -110,11 +109,11 @@ export const getFirebaseToken = async () => {
 //                     }
 //                 })
 //                 .catch((error) => {
-//                     console.error('Error getting Firebase token:', error);
+//                     console.error('error getting Firebase token ', error);
 //                 });
 //         })
 //         .catch((error) => {
-//             console.error('Error registering service worker:', error);
+//             console.error('Error registering service worker ', error);
 //         });
 // };
 

@@ -21,7 +21,7 @@ export const sendPushNotification = async (userId, title, body, linkUrl) => {
 
 // export const sendPushNotification = async (title, body) => {
 //     if (!('serviceWorker' in navigator)) {
-//         console.error('Service workers are not supported in this browser');
+//         console.error('service workers are not supported in this browser');
 //         return;
 //     }
 //     const registration = await navigator.serviceWorker.getRegistration();
@@ -31,6 +31,6 @@ export const sendPushNotification = async (userId, title, body, linkUrl) => {
 //             // icon: '/firebase-logo.png'
 //         });
 //     } else {
-//         console.error('Service worker registration not found');
+//         console.error('service worker registration not found');
 //     }
 // };

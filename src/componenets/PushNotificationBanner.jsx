@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { getFirebaseToken } from '../utils/firebase';
-
-import logo from '../assets/sparky-dash-high-five.gif';
-import { toast, ToastContainer } from 'react-toastify';
 import { useSelector } from 'react-redux';
 
 const PushNotificationBanner = () => {
@@ -13,12 +10,11 @@ const PushNotificationBanner = () => {
     // const handleGetFirebaseToken = () => {
     //     getFirebaseToken()
     //       .then((firebaseToken) => {
-    //       console.log('Firebase token: ', firebaseToken);
+    //       console.log('firebase token ', firebaseToken);
     //       if(firebaseToken) setShowNotiBanner(false);
     //       })
-    //       .catch((err) => console.error('error while retrieving firebase token. ', err))
+    //       .catch((err) => console.error('error getting Firebase token ', err))
     // }
-
 
     const handleGetFirebaseToken = async () => {
       try {
@@ -26,10 +22,10 @@ const PushNotificationBanner = () => {
           if (firebaseToken) {
               setShowNotiBanner(false);
           } else {
-              console.error("Failed to get Firebase token.");
+              console.error("Failed to get Firebase token");
           }
       } catch (err) {
-          console.error('Error while retrieving Firebase token:', err);
+          console.error('error getting Firebase token', err);
       }
     };
 
@@ -40,14 +36,13 @@ const PushNotificationBanner = () => {
       }
     },[]);
   
-
-  //   useEffect(() => {
-  //     if (Notification.permission === 'granted') {
-  //         setShowNotiBanner(false);
-  //     } else {
-  //       setShowNotiBanner(true);
-  //     }
-  // }, []);
+    useEffect(() => {
+      if (Notification.permission === 'granted') {
+          setShowNotiBanner(false);
+      } else {
+        setShowNotiBanner(true);
+      }
+  }, []);
     
   return (
     <>

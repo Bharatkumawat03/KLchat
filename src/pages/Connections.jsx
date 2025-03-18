@@ -25,7 +25,6 @@ const Connections = () => {
 
     const handleChat = async (connection) => {
         try {
-            // const res = await axios.post();
             const data = {
                 firstName: user.firstName,
                 userId: user._id,
