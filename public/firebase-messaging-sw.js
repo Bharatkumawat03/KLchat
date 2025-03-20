@@ -48,14 +48,14 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-    console.log('Service Worker Activated');
+    console.log('service worker activated');
 
     event.waitUntil(
         caches.keys().then((cacheNames) => {
             return Promise.all(
                 cacheNames.map((cache) => {
                     if (cache !== CACHE_NAME) {
-                        console.log('Deleting old cache:', cache);
+                        console.log('deleting old cache:', cache);
                         return caches.delete(cache);
                     }
                 })

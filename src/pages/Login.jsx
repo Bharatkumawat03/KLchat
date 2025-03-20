@@ -23,7 +23,7 @@ const Login = () => {
         dispatch(addUser(res.data));
         // console.log(res.data);
         navigate("/");
-        toast.success("Login successfully !!")
+        toast.success("Signup successfully !!")
     } catch (error) {
         console.log(error);
         toast.error("Signup error");
