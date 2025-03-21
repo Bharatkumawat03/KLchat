@@ -26,7 +26,7 @@ const Login = () => {
         toast.success("Signup successfully !!")
     } catch (error) {
         console.log(error);
-        toast.error("Signup error");
+        toast.error(error.response.data);
     }
   }
 
@@ -39,7 +39,7 @@ const Login = () => {
         toast.success("Login successfully !!")
     } catch (error) {
         console.log(error);
-        toast.error("incorrect credentials");
+        toast.error(error.response.data);
     }
   }
 
