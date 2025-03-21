@@ -34,7 +34,7 @@ const PushNotificationBanner = () => {
       if(Notification.permission === 'granted'){
         handleGetFirebaseToken();
       }
-    },[]);
+    },[user]);
   
     useEffect(() => {
       if (Notification.permission === 'granted') {

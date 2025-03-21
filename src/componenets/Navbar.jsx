@@ -15,6 +15,9 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         try {
+          const fcmToken = "";
+          const ress = await axios.post(`${BASE_URL}/save-token`, { fcmToken }, { withCredentials: true });
+          console.log('fcmToken removed', ress.data);
             const res = await axios.post(BASE_URL + "/logout", {}, {withCredentials: true});
             // console.log(res);
             window.localStorage.clear();
