@@ -1,8 +1,6 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { useSelector } from 'react-redux'
 import ProfileCard from '../componenets/ProfileCard';
-import axios from 'axios';
-import { BASE_URL } from '../utils/constants';
 import EditProfileCard from '../componenets/EditProfileCard';
 
 const Profile = () => {

@@ -1,27 +1,36 @@
-import axios from 'axios'
 import React, { useEffect, useState } from 'react'
-import { BASE_URL } from '../utils/constants'
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { useQuery } from '@tanstack/react-query';
+import { getConnections } from '../utils/api';
+
+// const getFriends = async () => {
+//     const {data} = await axios.get(`${BASE_URL}/user/connections`, {withCredentials: true});
+//     return data;
+// }
 
 const Connections = () => {
-    const [connections, setConnections] = useState();
+    // const [connections, setConnections] = useState();
     const navigate = useNavigate();
     const user = useSelector((store) => store.user);
+    // const {data, error, isLoading} = useQuery(['connections'], getFriends);
+    const {data, error, isLoading} = useQuery({queryKey:['connections'], queryFn: getConnections});
+    console.log("here ",data);
+    // const connections = data;
 
-    const getConnections = async () => {
-        try {
-            const res = await axios.get(`${BASE_URL}/user/connections`, {withCredentials: true});
-            // console.log(res.data.data);
-            setConnections(res.data.data);
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    // const getConnections = async () => {
+    //     try {
+    //         const res = await axios.get(`${BASE_URL}/user/connections`, {withCredentials: true});
+    //         // console.log(res.data.data);
+    //         setConnections(res.data.data);
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
-    useEffect(() => {
-        getConnections();
-    },[]);
+    // useEffect(() => {
+    //     getConnections();
+    // },[]);
 
     const handleChat = async (connection) => {
         try {
@@ -49,14 +58,14 @@ const Connections = () => {
         }
     }
 
-
   return (
     <div className=''>
         <h1 className='text-3xl text-center my-4 ' >Connections</h1>
-        <p className='mt-5  text-center'>{connections == "" ? "no connections" : ""}</p>
+        <p className='mt-5  text-center'>{isLoading ? "Loading ..." : ""}</p>
+        <p className='mt-5  text-center'>{data?.data == "" ? "no connections" : ""}</p>
         <ul className="list bg-base-100 rounded-box shadow-md min-h-[80vh] ">
 
-        {connections?.map((connection,index) => {
+        {data?.data?.map((connection,index) => {
             return(
                 <div  key={index} className='flex'>
                 <li onClick={() => {handleChat(connection)}} className="list-row cursor-pointer hover:bg-base-300 flex gap-4 m-2 bg-base-200 p-4 px-8 mx-auto rounded-lg w-[90vw] md:w-1/2 lg:w-1/3">

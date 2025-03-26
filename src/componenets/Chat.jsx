@@ -2,20 +2,24 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, setMessage } from '../utils/chatSlice';
 import { createSocketConnection } from '../utils/socket';
-import axios from 'axios';
 import { BASE_URL, FRONTEND_BASE_URL } from '../utils/constants';
 import { useParams } from 'react-router-dom';
 import { LiaCheckDoubleSolid } from "react-icons/lia";
 import { sendPushNotification } from '../utils/notification';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { getChat } from '../utils/api';
 
 const Chat = () => {
     const [text, setText] = useState("");
-    const dispatch = useDispatch();
     const {targetUserId, targetUserName} = useParams();
+    // const dispatch = useDispatch();
+    const [msgs, setMsgs] = useState([]);
+
+    const queryClient = useQueryClient();
 
     const user = useSelector((store) => store.user);
     const userId = user?._id;
-    const msgs = useSelector((store) => store.chat);
+    // const msgs = useSelector((store) => store.chat);
     // console.log("here",msgs);
 
     const handleSendChat = async (e) => {
@@ -53,28 +57,37 @@ const Chat = () => {
         div.scrollTop = div.scrollHeight;
     };
     
-    const getChat = async () => {
-        try {
-            // console.log(targetUserId);
-            const res = await axios.get(`${BASE_URL}/chat/${targetUserId}`,{withCredentials: true});
-            // console.log(res.data);
-            dispatch(setMessage(res.data.messages))
-            // scrollToBottom();
-        } catch (error) {
-            console.error(error);
-        }
+    const getChatt = async () => {
+        const {data} = await getChat({targetUserId});
+        return data?.messages;
     }
+
+    const { data, isLoading } = useQuery({queryKey: ["chat"], queryFn: getChatt});
+    console.log("chat ",data);
+
+
+    // const getChat = async () => {
+    //     try {
+    //         // console.log(targetUserId);
+    //         const res = await axios.get(`${BASE_URL}/chat/${targetUserId}`,{withCredentials: true});
+    //         // console.log(res.data);
+    //         dispatch(setMessage(res.data.messages))
+    //         // scrollToBottom();
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // }
     
     useEffect(() => {
-        getChat()
+        // getChat()
         scrollToBottom()
     },[]);
 
-    const msgsRef = useRef(msgs);
+    const msgsRef = useRef(data);
 
     useEffect(() => {
-        msgsRef.current = msgs;
-    }, [msgs]);
+        msgsRef.current = data;
+    }, [data]);
 
 
     useEffect(() => {
@@ -98,7 +111,13 @@ const Chat = () => {
                 createdAt: new Date().toISOString()
             }
             console.log(dd);
-            dispatch(addMessage(dd));
+
+            queryClient.setQueryData(['chat'], (oldChat) => {
+                if(!oldChat) return [dd];
+                return [...oldChat, dd];
+            })
+            // setMsgs((prevMsgs) => [...prevMsgs, dd])
+            // dispatch(addMessage(dd));
             scrollToBottom()
 
             socket.emit("messageSeen", { userId, targetUserId });
@@ -126,7 +145,8 @@ const Chat = () => {
             // console.log("Updated msgs", updatedMessages);
         
             if (updatedMessages.length > 0) {
-                dispatch(setMessage(updatedMessages));
+                queryClient.setQueryData(['chat'], updatedMessages);
+                // dispatch(setMessage(updatedMessages));
             }
         });
     
@@ -151,7 +171,7 @@ const Chat = () => {
 
         <div className='scroll-container h-[71vh] p-4'>
 
-        {msgs?.map((msg,index) => {
+        {data?.map((msg,index) => {
             const isSentByUser = msg?.senderId?.firstName === user.firstName;
             const seenIconColor = msg.status === "seen" ? "#1E90FF" : "#6C757D";
 

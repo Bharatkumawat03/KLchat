@@ -5,16 +5,8 @@ import { useSelector } from 'react-redux';
 const PushNotificationBanner = () => {
 
     const user = useSelector(store => store.user);
+    // const user = localStorage.getItem("user");
     const [showNotiBanner, setShowNotiBanner] = useState(Notification.permission === 'default');
-
-    // const handleGetFirebaseToken = () => {
-    //     getFirebaseToken()
-    //       .then((firebaseToken) => {
-    //       console.log('firebase token ', firebaseToken);
-    //       if(firebaseToken) setShowNotiBanner(false);
-    //       })
-    //       .catch((err) => console.error('error getting Firebase token ', err))
-    // }
 
     const handleGetFirebaseToken = async () => {
       try {
@@ -29,12 +21,11 @@ const PushNotificationBanner = () => {
       }
     };
 
-
-    useEffect(() => {
-      if(Notification.permission === 'granted'){
-        handleGetFirebaseToken();
-      }
-    },[user]);
+    // useEffect(() => {
+    //   if(Notification.permission === 'granted'){
+    //     handleGetFirebaseToken();
+    //   }
+    // },[user]);
   
     useEffect(() => {
       if (Notification.permission === 'granted') {
@@ -50,7 +41,7 @@ const PushNotificationBanner = () => {
       {showNotiBanner && <div role="alert" className="alert flex justify-between px-10">
           <span>Enable push notifications.</span>
           <div className=''>
-            <button onClick={handleGetFirebaseToken} className="btn btn-sm btn-primary mx-3">Enable</button>
+            <button onClick={() => handleGetFirebaseToken} className="btn btn-sm btn-primary mx-3">Enable</button>
             <button onClick={() => setShowNotiBanner(false)} className="btn btn-sm btn-secondary">Cancel</button>
           </div>
         </div> 

@@ -1,10 +1,7 @@
-import axios from 'axios';
 import { initializeApp } from 'firebase/app';
 import 'firebase/messaging';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { BASE_URL } from './constants';
-import { useDispatch, useSelector } from 'react-redux';
-import { addUser } from './userSlice';
+import { saveFcmToken } from './api';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -76,7 +73,7 @@ export const getFirebaseToken = async () => {
 
         console.log('firebase token ', token);
 
-        const res = await axios.post(`${BASE_URL}/save-token`, { fcmToken: token }, { withCredentials: true });
+        const res = await saveFcmToken({ fcmToken: token });
         console.log('Token saved:', res.data);
 
         return token;

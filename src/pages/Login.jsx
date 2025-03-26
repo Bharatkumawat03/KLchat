@@ -1,10 +1,10 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { BASE_URL } from "../utils/constants";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/userSlice";
+import { getFirebaseToken } from "../utils/firebase";
+import { loginApi, signupApi } from "../utils/api";
 // import { toast } from "react-toastify";
 
 const Login = () => {
@@ -17,13 +17,29 @@ const Login = () => {
   const dispatch = useDispatch();
   const user = useSelector((store) => store.user);
 
+  const handleGetFirebaseToken = async () => {
+        try {
+            const firebaseToken = await getFirebaseToken();
+            if (firebaseToken) {
+              console.log("Firebase token", firebaseToken);
+            } else {
+                console.error("Failed to get Firebase token");
+            }
+        } catch (err) {
+            console.error('error getting Firebase token', err);
+        }
+      };
+
   const handleSignup = async () => {
     try {
-        const res = await axios.post(BASE_URL + "/signup", {firstName, lastName, emailId, password}, { withCredentials: true });
+        const res = await signupApi({firstName, lastName, emailId, password});
         dispatch(addUser(res.data));
         // console.log(res.data);
         navigate("/");
         toast.success("Signup successfully !!")
+        if(Notification.permission === 'granted'){
+          handleGetFirebaseToken();
+        }
     } catch (error) {
         console.log(error);
         toast.error(error.response.data);
@@ -32,11 +48,14 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-        const res = await axios.post(BASE_URL + "/login", {emailId, password}, { withCredentials: true });
+        const res = await loginApi({emailId, password});
         console.log(res.data);
         dispatch(addUser(res.data));
         navigate("/");
         toast.success("Login successfully !!")
+        if(Notification.permission === 'granted'){
+          handleGetFirebaseToken();
+        }
     } catch (error) {
         console.log(error);
         toast.error(error.response.data);

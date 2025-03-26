@@ -1,12 +1,9 @@
 import React, { useState } from "react";
-import { useAuth0 } from "@auth0/auth0-react";
 import { isCookie, Link, useNavigate } from "react-router-dom";
-import axios from "axios";
-import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../utils/userSlice";
 import { toast } from "react-toastify";
-import Connections from "../pages/Connections";
+import { logoutApi, saveFcmToken } from "../utils/api";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -15,9 +12,9 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         try {
-          const ress = await axios.post(`${BASE_URL}/save-token`, { fcmToken: "" }, { withCredentials: true });
+          const ress = await saveFcmToken({ fcmToken: "" });
           console.log('fcmToken removed', ress.data);
-            const res = await axios.post(BASE_URL + "/logout", {}, {withCredentials: true});
+            const res = await logoutApi();
             // console.log(res);
             localStorage.clear();
             dispatch(removeUser());

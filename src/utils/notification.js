@@ -1,9 +1,8 @@
-import axios from "axios";
-import { BASE_URL } from "./constants";
+import { sendNotification } from "./api";
 
 export const sendPushNotification = async (userId, title, body, linkUrl) => {
     try {
-        const response = await axios.post(`${BASE_URL}/send-notification`, { userId, title, body, linkUrl }, {withCredentials: true});
+        const response = await sendNotification({ userId, title, body, linkUrl });
 
         if (response.data && response.data.success) {
             console.log('notification sent successfully ', response.data);
