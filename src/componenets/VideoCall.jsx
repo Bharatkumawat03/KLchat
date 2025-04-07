@@ -6,6 +6,8 @@ import { sendPushNotification } from '../utils/notification';
 import { toast } from 'react-toastify';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import { useNotification } from './NotificationContext';
+import { IoMic, IoMicOff } from "react-icons/io5";
+import { MdCallEnd } from "react-icons/md";
 
 const VideoCall = () => {
   const localVideo = useRef(null);
@@ -477,16 +479,16 @@ const VideoCall = () => {
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-4">
         <button
           onClick={() => endCall(true)}
-          className="bg-red-500 hover:bg-red-600 text-white p-3 rounded-full shadow-lg"
+          className="bg-red-500 w-10 h-10 hover:bg-red-600 text-white p-3 rounded-full shadow-lg"
         >
-          ✖️
+          <MdCallEnd />
         </button>
 
         <button
           onClick={toggleMute}
-          className="bg-blue-500 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg"
+          className="bg-blue-500 w-10 h-10 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg"
         >
-          {audioMuted ? "🔇" : "🔊"}
+          {audioMuted ? <IoMicOff /> : <IoMic />}
         </button>
 
         {/* {!peerConnection?.current && (

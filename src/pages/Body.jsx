@@ -13,6 +13,7 @@ import { getApiData } from '../utils/api';
 import Ringtone from '../assets/call.mp3';
 import { sendPushNotification } from '../utils/notification';
 import { useNotification } from '../componenets/NotificationContext';
+import { MdCallEnd, MdVideoCall } from "react-icons/md";
 
 const Body = () => {
     const navigate = useNavigate();
@@ -215,15 +216,15 @@ const Body = () => {
           <div className="flex gap-4">
             <button
               onClick={() => acceptCall(incomingCall.click_action)}
-              className="bg-green-500 text-white px-6 py-3 rounded-lg"
+              className="bg-green-500 text-white px-3 py-3 rounded-full"
             >
-              Accept
+              <MdVideoCall />
             </button>
             <button
               onClick={() => rejectCall(incomingCall.senderId)}
-              className="bg-red-500 text-white px-6 py-3 rounded-lg"
+              className="bg-red-500 text-white px-3 py-3 rounded-full"
             >
-              Reject
+              <MdCallEnd />
             </button>
           </div>
         </div>
