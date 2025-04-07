@@ -10,11 +10,11 @@ export const NotificationProvider = ({ children }) => {
     const messaging = getMessaging();
 
     const unsubscribe = onMessage(messaging, (payload) => {
-      console.log('Received foreground message in NotificationContext:', payload);
-      setNotification(payload); // Update the notification state
+      console.log('foreground message in NotificationContext', payload);
+      setNotification(payload);
     });
 
-    return () => unsubscribe(); // Clean up the listener on unmount
+    return () => unsubscribe();
   }, []);
 
   return (

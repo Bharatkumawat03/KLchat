@@ -1,33 +1,32 @@
-import React, { useEffect, useRef, useState } from 'react'
-import Navbar from '../componenets/Navbar'
-import Footer from '../componenets/Footer'
-import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
-import { useDispatch, useSelector } from 'react-redux';
-import { addUser } from '../utils/userSlice';
-import PushNotificationBanner from '../componenets/PushNotificationBanner';
-import { getMessaging, onMessage } from 'firebase/messaging';
-import { toast } from 'react-toastify';
-import Cookies from 'js-cookie';
-import { useQuery } from '@tanstack/react-query';
-import { getApiData } from '../utils/api';
-import Ringtone from '../assets/call.mp3';
-import { sendPushNotification } from '../utils/notification';
-import { useNotification } from '../componenets/NotificationContext';
+import React, { useEffect, useRef, useState } from "react";
+import Navbar from "../componenets/Navbar";
+import Footer from "../componenets/Footer";
+import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { addUser } from "../utils/userSlice";
+import PushNotificationBanner from "../componenets/PushNotificationBanner";
+import { getMessaging, onMessage } from "firebase/messaging";
+import { toast } from "react-toastify";
+import Cookies from "js-cookie";
+import { useQuery } from "@tanstack/react-query";
+import { getApiData } from "../utils/api";
+import Ringtone from "../assets/call.mp3";
+import { sendPushNotification } from "../utils/notification";
+import { useNotification } from "../componenets/NotificationContext";
 import { MdCallEnd, MdVideoCall } from "react-icons/md";
 
 const Body = () => {
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const user = localStorage.getItem("user");
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = localStorage.getItem("user");
 
-    
   const { notification, setNotification } = useNotification();
-    
+
   const [incomingCall, setIncomingCall] = useState(null);
   const ringtoneRef = useRef(null);
 
   const loc = useLocation();
-  const {targetUserName} = useParams();
+  const { targetUserName } = useParams();
   const [currentChatUserName, setCurrentChatUserName] = useState(null);
 
   useEffect(() => {
@@ -55,25 +54,25 @@ const Body = () => {
       }
 
       console.log("Call rejected");
-      
-      sendPushNotification(data,"Call Rejected","Call rejected.","/");
+
+      sendPushNotification(data, "Call Rejected", "Call rejected.", "/");
     }
   };
 
   useEffect(() => {
     if (notification) {
       const { title } = notification.data;
-    // const messaging = getMessaging();
-    // const unsubscribe = onMessage(messaging, (payload) => {
-    //   console.log('Received foreground message: ', payload);
-      
+      // const messaging = getMessaging();
+      // const unsubscribe = onMessage(messaging, (payload) => {
+      //   console.log('Received foreground message: ', payload);
+
       // console.log(currentChatUserName);
       // const { title } = payload.data;
 
       // console.log(title === currentChatUserName);
-      if(title === targetUserName) return ;
+      if (title === targetUserName) return;
 
-      if(title === "Incoming Call"){
+      if (title === "Incoming Call") {
         if (ringtoneRef.current) {
           ringtoneRef.current.pause();
           ringtoneRef.current.currentTime = 0;
@@ -90,15 +89,15 @@ const Body = () => {
         //   <div className="w-[100vw] max-w-md h-auto bg-gray-900 text-white p-5 rounded-lg flex flex-col justify-center items-center shadow-lg">
         //     <p className="text-xl font-semibold">{payload.data.title}</p>
         //     <p className="text-sm text-gray-300">{payload.data.body}</p>
-      
+
         //     <div className="flex justify-around w-full mt-4">
-        //       <button 
+        //       <button
         //         className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600"
         //         onClick={() => window.location.href = payload.data.click_action}
         //       >
         //         Accept
         //       </button>
-        //       <button 
+        //       <button
         //         onClick={() => rejectCall(payload.data.senderId)}
         //         className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
         //       >
@@ -114,24 +113,23 @@ const Body = () => {
         //     draggable: false,
         //   }
         // );
-      }
-      else if(title === "Call Ended"){
+      } else if (title === "Call Ended") {
         setIncomingCall(null);
         toast.dismiss();
         if (ringtoneRef.current) {
           ringtoneRef.current.pause();
           ringtoneRef.current.currentTime = 0;
         }
-      }
-      else{
+      } else {
         console.log("Notification link", notification?.data?.click_action);
         toast(
           <div>
             <strong>{notification.data.title}</strong>
             <br />
             {notification.data.body}
-          </div>, {
-            position: 'top-right',
+          </div>,
+          {
+            position: "top-right",
             autoClose: 5000,
             hideProgressBar: true,
             closeOnClick: true,
@@ -147,22 +145,27 @@ const Body = () => {
           }
         );
       }
-    // });
-  
-    // return () => unsubscribe();
-  // }, [targetUserName, currentChatUserName, incomingCall, ringtoneRef]); 
-  setNotification(null);
+      // });
+
+      // return () => unsubscribe();
+      // }, [targetUserName, currentChatUserName, incomingCall, ringtoneRef]);
+      setNotification(null);
     }
   }, [notification, setNotification]);
 
   const getUser = async () => {
     const data = getApiData("/profile/view");
     return data;
-  }
+  };
 
-  const {data: userData} = useQuery({queryKey: ["user"], queryFn: getUser, refetchOnWindowFocus: false,
-    onError: (error) => {console.error("error fetching user data",error.message);}
-   });
+  const { data: userData } = useQuery({
+    queryKey: ["user"],
+    queryFn: getUser,
+    refetchOnWindowFocus: false,
+    onError: (error) => {
+      console.error("error fetching user data", error.message);
+    },
+  });
   // console.log("user data ", userData);
 
   useEffect(() => {
@@ -170,9 +173,9 @@ const Body = () => {
       dispatch(addUser(userData.data));
     }
   }, [userData, dispatch]);
-  
+
   const checkAuth = () => {
-    const token = Cookies.get('token');
+    const token = Cookies.get("token");
     if (!token) {
       localStorage.clear();
     }
@@ -182,13 +185,9 @@ const Body = () => {
     checkAuth();
   }, []);
 
-  
   useEffect(() => {
-    if(!user)(
-      navigate('/login')
-    )
-  },[]);
-
+    if (!user) navigate("/login");
+  }, []);
 
   useEffect(() => {
     if (incomingCall) {
@@ -201,7 +200,7 @@ const Body = () => {
         setIncomingCall(null);
         toast.dismiss();
       }, 10000);
-  
+
       return () => clearTimeout(timeout);
     }
   }, [incomingCall, ringtoneRef]);
@@ -210,9 +209,7 @@ const Body = () => {
     <div>
       {incomingCall && (
         <div className="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
-          <h2 className="text-white text-2xl mb-4">
-            {incomingCall.body}
-          </h2>
+          <h2 className="text-white text-2xl mb-4">{incomingCall.body}</h2>
           <div className="flex gap-4">
             <button
               onClick={() => acceptCall(incomingCall.click_action)}
@@ -230,14 +227,14 @@ const Body = () => {
         </div>
       )}
 
-        <Navbar />
-        <PushNotificationBanner />
-        <div className='min-h-[82.5vh]'>
+      <Navbar />
+      <PushNotificationBanner />
+      <div className="min-h-[82.5vh]">
         <Outlet />
-        </div>
-        <Footer />
+      </div>
+      <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default Body
+export default Body;

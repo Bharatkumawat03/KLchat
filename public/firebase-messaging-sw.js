@@ -29,7 +29,7 @@ messaging.onBackgroundMessage((payload) => {
       // body: payload.notification.body,
       body: payload.data.body,
       data: {
-          senderId: payload.data.senderId,
+        senderId: payload.data.senderId,
         click_action:
           payload.data?.click_action || "https://klchat.onrender.com",
       },
@@ -42,42 +42,42 @@ messaging.onBackgroundMessage((payload) => {
     };
 
     self.clients.matchAll({ includeUncontrolled: true }).then((clients) => {
-        clients.forEach((client) => {
-          client.postMessage({
-            type: "INCOMING_CALL",
-            payload: payload.data,
-          });
+      clients.forEach((client) => {
+        client.postMessage({
+          type: "INCOMING_CALL",
+          payload: payload.data,
         });
       });
+    });
 
     self.registration.showNotification(notificationTitle, notificationOptions);
 
     const timeout = setTimeout(() => {
-        console.log("Incoming call timed out (background).");
-  
-        self.registration.getNotifications().then((notifications) => {
-          notifications.forEach((notification) => {
-            if (notification.title === "Incoming Call") {
-              notification.close();
-            }
-          });
-        });
-  
-        self.clients.matchAll({ includeUncontrolled: true }).then((clients) => {
-          clients.forEach((client) => {
-            client.postMessage({
-              type: "CALL_TIMEOUT",
-              payload: payload.data,
-            });
-          });
-        });
-      }, 10000);
+      console.log("Incoming call timed out (background).");
 
-      self.addEventListener("notificationclick", (event) => {
-        if (event.notification.title === "Incoming Call") {
-          clearTimeout(timeout);
-        }
+      self.registration.getNotifications().then((notifications) => {
+        notifications.forEach((notification) => {
+          if (notification.title === "Incoming Call") {
+            notification.close();
+          }
+        });
       });
+
+      self.clients.matchAll({ includeUncontrolled: true }).then((clients) => {
+        clients.forEach((client) => {
+          client.postMessage({
+            type: "CALL_TIMEOUT",
+            payload: payload.data,
+          });
+        });
+      });
+    }, 10000);
+
+    self.addEventListener("notificationclick", (event) => {
+      if (event.notification.title === "Incoming Call") {
+        clearTimeout(timeout);
+      }
+    });
   } else if (payload.data.type === "Call Ended") {
     self.clients.matchAll({ includeUncontrolled: true }).then((clients) => {
       clients.forEach((client) => {
@@ -88,8 +88,7 @@ messaging.onBackgroundMessage((payload) => {
       });
     });
     notification.close();
-  }
-   else {
+  } else {
     const notificationOptions = {
       // body: payload.notification.body,
       body: payload.data.body,
@@ -193,7 +192,10 @@ self.addEventListener("notificationclick", function (event) {
             }
 
             for (const client of clientList) {
-              if (client.url.includes("klchat.onrender.com") && "focus" in client) {
+              if (
+                client.url.includes("klchat.onrender.com") &&
+                "focus" in client
+              ) {
                 console.log(
                   "found existing client, focusing and navigating ",
                   client
@@ -217,7 +219,7 @@ self.addEventListener("notificationclick", function (event) {
     } else if (action === "reject") {
       console.log("Call rejected");
       event.notification.close();
-        
+
       console.log("target user id", event.notification.data.senderId);
       console.log("target user id", event.notification.title);
       event.waitUntil(
@@ -226,7 +228,7 @@ self.addEventListener("notificationclick", function (event) {
             client.postMessage({
               type: "CALL_REJECTED",
               payload: {
-                senderId : event.notification.data.senderId,
+                senderId: event.notification.data.senderId,
                 title: event.notification.title,
                 body: event.notification.body,
                 click_action: event.notification.data.click_action,
@@ -281,45 +283,3 @@ self.addEventListener("notificationclick", function (event) {
     );
   }
 });
-
-// self.addEventListener('notificationclick', function(event) {
-//     console.log('notification click ', event.notification);
-
-//     const url = event.notification.data?.click_action || '/';
-//     console.log('url ', url);
-
-//     event.notification.close();
-
-//     event.waitUntil(
-//         clients.matchAll({ type: 'window', includeUncontrolled: true })
-//             .then(clientList => {
-//                 console.log('client list ', clientList);
-
-//                 for (const client of clientList) {
-//                     if (client.url === url && 'focus' in client) {
-//                         console.log('client at URL, focusing ', client);
-//                         return client.focus();
-//                     }
-//                 }
-
-//                 for (const client of clientList) {
-//                     if (client.url.includes('klchat.onrender.com') && 'focus' in client) {
-//                         console.log('found existing client, focusing and navigating ', client);
-//                         return client.focus()
-//                             .then(() => {
-//                                 if ('navigate' in client) {
-//                                     return client.navigate(url);
-//                                 }
-//                             });
-//                     }
-//                 }
-
-//                 console.log('no matching url, opening new window', url);
-//                 return clients.openWindow(url);
-//             })
-//             .catch(error => {
-//                 console.error('error in notification click ', error);
-//                 return clients.openWindow(url);
-//             })
-//     );
-// });

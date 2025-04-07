@@ -130,30 +130,30 @@ function App() {
 
   return (
     <>
-    <NotificationProvider>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter basename="/">
-          <ToastContainer />
-          <Routes>
-            <Route path="/" element={<Body />}>
-              <Route index element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/connections" element={<Connections />} />
-              <Route path="/requests" element={<Requests />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route
-                path="/chat/:targetUserId/:targetUserName"
-                element={<Chat />}
-              />
-              <Route
-                path="/call/:targetUserId/:targetUserName"
-                element={<VideoCall />}
-              />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-        <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      <NotificationProvider>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter basename="/">
+            <ToastContainer />
+            <Routes>
+              <Route path="/" element={<Body />}>
+                <Route index element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/connections" element={<Connections />} />
+                <Route path="/requests" element={<Requests />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route
+                  path="/chat/:targetUserId/:targetUserName"
+                  element={<Chat />}
+                />
+                <Route
+                  path="/call/:targetUserId/:targetUserName"
+                  element={<VideoCall />}
+                />
+              </Route>
+            </Routes>
+          </BrowserRouter>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
       </NotificationProvider>
     </>
   );
