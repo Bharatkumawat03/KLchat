@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Navbar from '../componenets/Navbar'
 import Footer from '../componenets/Footer'
 import { Outlet, useLocation, useNavigate, useParams } from 'react-router-dom'
@@ -9,14 +9,21 @@ import { getMessaging, onMessage } from 'firebase/messaging';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { useQuery } from '@tanstack/react-query';
-import { getUser } from '../utils/api';
+import { getApiData } from '../utils/api';
+import Ringtone from '../assets/call.mp3';
+import { sendPushNotification } from '../utils/notification';
+import { useNotification } from '../componenets/NotificationContext';
 
 const Body = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    // const user = useSelector((store) => store.user);
     const user = localStorage.getItem("user");
-    console.log("user from local", user);
+
+    
+  const { notification, setNotification } = useNotification();
+    
+  const [incomingCall, setIncomingCall] = useState(null);
+  const ringtoneRef = useRef(null);
 
   const loc = useLocation();
   const {targetUserName} = useParams();
@@ -26,92 +33,138 @@ const Body = () => {
     setCurrentChatUserName(targetUserName);
   }, [loc, targetUserName]);
 
+  const acceptCall = (data) => {
+    setIncomingCall(null);
+    if (incomingCall) {
+      if (ringtoneRef.current) {
+        ringtoneRef.current.pause();
+        ringtoneRef.current.currentTime = 0;
+      }
+
+      window.location.href = data;
+    }
+  };
+
+  const rejectCall = (data) => {
+    setIncomingCall(null);
+    if (incomingCall) {
+      if (ringtoneRef.current) {
+        ringtoneRef.current.pause();
+        ringtoneRef.current.currentTime = 0;
+      }
+
+      console.log("Call rejected");
+      
+      sendPushNotification(data,"Call Rejected","Call rejected.","/");
+    }
+  };
+
   useEffect(() => {
-    const messaging = getMessaging();
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log('Received foreground message: ', payload);
+    if (notification) {
+      const { title } = notification.data;
+    // const messaging = getMessaging();
+    // const unsubscribe = onMessage(messaging, (payload) => {
+    //   console.log('Received foreground message: ', payload);
       
-      console.log(currentChatUserName);
-      const { title } = payload.data;
+      // console.log(currentChatUserName);
+      // const { title } = payload.data;
 
-      console.log(title === currentChatUserName);
+      // console.log(title === currentChatUserName);
       if(title === targetUserName) return ;
-      
-      toast(
-        <div>
-          <strong>{payload.data.title}</strong>
-          <br />
-          {payload.data.body}
-        </div>, {
-          position: 'top-right',
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          onClick: () => {
-            const link = payload.data.click_action;
-            window.location.href = link;
-          },
+
+      if(title === "Incoming Call"){
+        if (ringtoneRef.current) {
+          ringtoneRef.current.pause();
+          ringtoneRef.current.currentTime = 0;
         }
-      );
-    });
+
+        setIncomingCall(notification.data);
+
+        const audio = new Audio(Ringtone);
+        audio.loop = true;
+        audio.play();
+        ringtoneRef.current = audio;
+
+        // toast(
+        //   <div className="w-[100vw] max-w-md h-auto bg-gray-900 text-white p-5 rounded-lg flex flex-col justify-center items-center shadow-lg">
+        //     <p className="text-xl font-semibold">{payload.data.title}</p>
+        //     <p className="text-sm text-gray-300">{payload.data.body}</p>
+      
+        //     <div className="flex justify-around w-full mt-4">
+        //       <button 
+        //         className="bg-green-500 text-white px-4 py-2 rounded-full hover:bg-green-600"
+        //         onClick={() => window.location.href = payload.data.click_action}
+        //       >
+        //         Accept
+        //       </button>
+        //       <button 
+        //         onClick={() => rejectCall(payload.data.senderId)}
+        //         className="bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600"
+        //       >
+        //         Reject
+        //       </button>
+        //     </div>
+        //   </div>,
+        //   {
+        //     position: "top-center",
+        //     autoClose: false,
+        //     hideProgressBar: true,
+        //     closeOnClick: false,
+        //     draggable: false,
+        //   }
+        // );
+      }
+      else if(title === "Call Ended"){
+        setIncomingCall(null);
+        toast.dismiss();
+        if (ringtoneRef.current) {
+          ringtoneRef.current.pause();
+          ringtoneRef.current.currentTime = 0;
+        }
+      }
+      else{
+        toast(
+          <div>
+            <strong>{notification.data.title}</strong>
+            <br />
+            {notification.data.body}
+          </div>, {
+            position: 'top-right',
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            onClick: () => {
+              const link = notification.data.data.click_action;
+              window.location.href = link;
+            },
+          }
+        );
+      }
+    // });
   
-    return () => unsubscribe();
-  }, [currentChatUserName]); 
+    // return () => unsubscribe();
+  // }, [targetUserName, currentChatUserName, incomingCall, ringtoneRef]); 
+  setNotification(null);
+    }
+  }, [notification, setNotification]);
 
+  const getUser = async () => {
+    const data = getApiData("/profile/view");
+    return data;
+  }
 
-  // const getUser = async () => {
-  //   const {data} = await axios.get(BASE_URL + "/profile/view", {withCredentials: true});
-  //   // localStorage.setItem("user", JSON.stringify(res.data));
-  //   return data;
-  // }
+  const {data: userData} = useQuery({queryKey: ["user"], queryFn: getUser, refetchOnWindowFocus: false,
+    onError: (error) => {console.error("error fetching user data",error.message);}
+   });
+  // console.log("user data ", userData);
 
-  const {data: userData} = useQuery({queryKey: ["user"], queryFn: getUser});
-  console.log("user data ", userData);
   useEffect(() => {
     if (userData) {
-      dispatch(addUser(userData));
+      dispatch(addUser(userData.data));
     }
   }, [userData, dispatch]);
-
-  // const getUser = async () => {
-  //   try {
-  //       const res = await axios.get(BASE_URL + "/profile/view", {withCredentials: true});
-  //       // console.log(res.data);
-  //       dispatch(addUser(res.data));
-  //   } catch (error) {
-  //       console.log(error);
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   getUser();
-  // }, []);
-
-
-  // const getFeed = async () => {
-  //   const {data} = await axios.get(BASE_URL + "/feed", {withCredentials: true});
-  //   return data;
-  // }
-
-  // const {data} = useQuery({queryKey: ["feed"], queryFn: getFeed});
-  // console.log(data);
-  
-  // const getFeed = async () => {
-  //   try {
-  //     const res = await axios.get(BASE_URL + "/feed", {withCredentials: true});
-  //     // console.log(res.data.data);
-  //     dispatch(setFeed(res.data.data));
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // }
-  
-  // useEffect(()=>{
-  //   getFeed();
-  // },[user]);
-
   
   const checkAuth = () => {
     const token = Cookies.get('token');
@@ -132,8 +185,46 @@ const Body = () => {
   },[]);
 
 
+  useEffect(() => {
+    if (incomingCall) {
+      const timeout = setTimeout(() => {
+        console.log("Incoming call timed out.");
+        if (ringtoneRef.current) {
+          ringtoneRef.current.pause();
+          ringtoneRef.current.currentTime = 0;
+        }
+        setIncomingCall(null);
+        toast.dismiss();
+      }, 10000);
+  
+      return () => clearTimeout(timeout);
+    }
+  }, [incomingCall, ringtoneRef]);
+
   return (
     <div>
+      {incomingCall && (
+        <div className="fixed inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50">
+          <h2 className="text-white text-2xl mb-4">
+            {incomingCall.body}
+          </h2>
+          <div className="flex gap-4">
+            <button
+              onClick={() => acceptCall(incomingCall.click_action)}
+              className="bg-green-500 text-white px-6 py-3 rounded-lg"
+            >
+              Accept
+            </button>
+            <button
+              onClick={() => rejectCall(incomingCall.senderId)}
+              className="bg-red-500 text-white px-6 py-3 rounded-lg"
+            >
+              Reject
+            </button>
+          </div>
+        </div>
+      )}
+
         <Navbar />
         <PushNotificationBanner />
         <div className='min-h-[82.5vh]'>

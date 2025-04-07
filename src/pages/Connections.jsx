@@ -2,20 +2,23 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useQuery } from '@tanstack/react-query';
-import { getConnections } from '../utils/api';
+import { getApiData } from '../utils/api';
 
-// const getFriends = async () => {
-//     const {data} = await axios.get(`${BASE_URL}/user/connections`, {withCredentials: true});
-//     return data;
-// }
+const getFriends = async () => {
+    const {data} = await getApiData('/user/connections')
+    return data;
+}
 
 const Connections = () => {
     // const [connections, setConnections] = useState();
     const navigate = useNavigate();
     const user = useSelector((store) => store.user);
     // const {data, error, isLoading} = useQuery(['connections'], getFriends);
-    const {data, error, isLoading} = useQuery({queryKey:['connections'], queryFn: getConnections});
-    console.log("here ",data);
+    const {data, error, isLoading, isError} = useQuery({queryKey:['connections'], queryFn: getFriends,refetchOnWindowFocus: false,
+        onError: (error) => console.error("error fetching connections ",error.message),
+     });
+    // console.log("here ",data);
+    
     // const connections = data;
 
     // const getConnections = async () => {
@@ -61,7 +64,7 @@ const Connections = () => {
   return (
     <div className=''>
         <h1 className='text-3xl text-center my-4 ' >Connections</h1>
-        <p className='mt-5  text-center'>{isLoading ? "Loading ..." : ""}</p>
+        <p className='mt-5  text-center'>{isLoading ? "Loading Connections..." : ""}</p>
         <p className='mt-5  text-center'>{data?.data == "" ? "no connections" : ""}</p>
         <ul className="list bg-base-100 rounded-box shadow-md min-h-[80vh] ">
 

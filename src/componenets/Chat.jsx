@@ -2,17 +2,29 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { addMessage, setMessage } from '../utils/chatSlice';
 import { createSocketConnection } from '../utils/socket';
-import { BASE_URL, FRONTEND_BASE_URL } from '../utils/constants';
-import { useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { LiaCheckDoubleSolid } from "react-icons/lia";
 import { sendPushNotification } from '../utils/notification';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getChat } from '../utils/api';
+import { getApiData } from '../utils/api';
+
+
+// const pc = new RTCPeerConnection(configuration); 
+
+// try {
+//     pc.current = new RTCPeerConnection(configuration);
+//     pc.current.onicecandidate = (e) => {
+
+//     }
+// } catch (error) {
+    
+// }
 
 const Chat = () => {
     const [text, setText] = useState("");
     const {targetUserId, targetUserName} = useParams();
     // const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [msgs, setMsgs] = useState([]);
 
     const queryClient = useQueryClient();
@@ -39,8 +51,8 @@ const Chat = () => {
             });
 
             const username = user.firstName + " " + user.lastName;
-            const linkUrl = `${FRONTEND_BASE_URL}/chat/${userId}/${user.firstName + "%20" + user.lastName}`
-            sendPushNotification(targetUserId,username, text, linkUrl);
+            const url = `/chat/${userId}/${user.firstName + "%20" + user.lastName}`
+            sendPushNotification(targetUserId,username, text, url);
 
             // dispatch(addMessage(text));
             setText("");
@@ -57,26 +69,15 @@ const Chat = () => {
         div.scrollTop = div.scrollHeight;
     };
     
-    const getChatt = async () => {
-        const {data} = await getChat({targetUserId});
+    const getChat = async () => {
+        const {data} = await getApiData(`/chat/${targetUserId}`);
         return data?.messages;
     }
 
-    const { data, isLoading } = useQuery({queryKey: ["chat"], queryFn: getChatt});
-    console.log("chat ",data);
-
-
-    // const getChat = async () => {
-    //     try {
-    //         // console.log(targetUserId);
-    //         const res = await axios.get(`${BASE_URL}/chat/${targetUserId}`,{withCredentials: true});
-    //         // console.log(res.data);
-    //         dispatch(setMessage(res.data.messages))
-    //         // scrollToBottom();
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // }
+    const { data, isLoading, isError, error } = useQuery({queryKey: ["chat"], queryFn: getChat, refetchOnWindowFocus: false,
+        onError: (error) => console.error("error fetching chat",error.message),
+     });
+    // console.log("chat ",data);
     
     useEffect(() => {
         // getChat()
@@ -110,7 +111,7 @@ const Chat = () => {
                 status,
                 createdAt: new Date().toISOString()
             }
-            console.log(dd);
+            // console.log(dd);
 
             queryClient.setQueryData(['chat'], (oldChat) => {
                 if(!oldChat) return [dd];
@@ -132,7 +133,7 @@ const Chat = () => {
             // console.log("current msgs", currentMessages); 
         
             if (!currentMessages || currentMessages.length === 0) {
-                console.log("No msgs for update");
+                // console.log("No msgs for update");
                 return;
             }
         
@@ -163,13 +164,31 @@ const Chat = () => {
         scrollToBottom()
     })
 
+    const initiateCall = () => {
+        try {
+            // console.log("initiating call");
+            navigate("/call/"+targetUserId+"/"+targetUserName);
+
+            const title = 'Incoming Call';
+            const text = `${user.firstName} is calling...`;
+            const linkUrl = `/call/${userId}/${user.firstName + "%20" + user.lastName}`
+            sendPushNotification(targetUserId, title, text, linkUrl);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     
     return (
     <div  className='list bg-base-100 rounded-box shadow-md h-full md:w-[70vw] mx-auto'>
-        <h1 className='text-3xl font-bold p-2 border-b-4 border-base-200'>{targetUserName}</h1>
+        <div className='p-2 border-b-4 border-base-200 flex justify-between'>
+        <h1 className='text-3xl font-bold '>{targetUserName}</h1>
+        <button onClick={() => initiateCall()} className='btn bg-secondary glass text-white'> Video Call </button>
+        </div>
         <div id='chat'  className='scroll-container overflow-y-auto'>
 
         <div className='scroll-container h-[71vh] p-4'>
+            {/* {isLoading && <p className='text-center' >Loading...</p>} */}
 
         {data?.map((msg,index) => {
             const isSentByUser = msg?.senderId?.firstName === user.firstName;

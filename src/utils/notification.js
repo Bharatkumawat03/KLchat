@@ -1,8 +1,10 @@
-import { sendNotification } from "./api";
+import { postApi } from "./api";
+import { FRONTEND_BASE_URL } from "./constants";
 
-export const sendPushNotification = async (userId, title, body, linkUrl) => {
+export const sendPushNotification = async (userId, title, body, url) => {
     try {
-        const response = await sendNotification({ userId, title, body, linkUrl });
+        const linkUrl = FRONTEND_BASE_URL + url;
+        const response = await postApi('/send-notification',{ userId, title, body, linkUrl });
 
         if (response.data && response.data.success) {
             console.log('notification sent successfully ', response.data);

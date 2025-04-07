@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import 'firebase/messaging';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { saveFcmToken } from './api';
+import { postApi } from './api';
 
 const firebaseConfig = {
     apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -40,7 +40,7 @@ export const getOrRegisterServiceWorker = async () => {
                 console.log('service worker installing');
             }
         } else {
-            console.log('using curr service worker ', registration);
+            // console.log('using curr service worker ', registration);
         }
         
         return registration;
@@ -73,7 +73,7 @@ export const getFirebaseToken = async () => {
 
         console.log('firebase token ', token);
 
-        const res = await saveFcmToken({ fcmToken: token });
+        const res = await postApi('/save-token',{ fcmToken: token });
         console.log('Token saved:', res.data);
 
         return token;

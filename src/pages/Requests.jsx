@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { FRONTEND_BASE_URL } from '../utils/constants'
 import { useDispatch, useSelector } from 'react-redux'
 import { removeRequest, setRequests } from '../utils/requestSlice'
 import { sendPushNotification } from '../utils/notification'
 import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { getRequests, reviewRequest } from '../utils/api'
+import { getApiData, postApi } from '../utils/api'
+import { toast } from 'react-toastify'
 
 const Requests = () => {
     // const [requests, setRequests] = useState([]);
@@ -14,19 +14,21 @@ const Requests = () => {
     
     const queryClient = useQueryClient();
     
-    // const getRequests = async () => {
-    //         const {data} = await axios.get(`${BASE_URL}/user/requests/received`, {withCredentials: true});
-    //         return data;
-    // }
-    const {data, isLoading} = useQuery({ queryKey: ['requests'], queryFn: getRequests });
-    console.log("res", data);
+    const getRequests = async () => {
+            const {data} = await getApiData('/user/requests/received');
+            return data;
+    }
+    const {data, isLoading, isError, error} = useQuery({ queryKey: ['requests'], queryFn: getRequests, refetchOnWindowFocus: false,
+        onError: (error) => console.error("error fetching requests",error.message)
+     });
+    console.log("request data", data);
 
 
     const handleRequest = async ({request,status}) => {
-        const res = await reviewRequest({request,status});
+        const res = await postApi(`/request/review/${status}/${request._id}`, {});
         if(status === "accepted"){
             const title = "connection request accepted.";
-            const linkUrl = `${FRONTEND_BASE_URL}/connections`
+            const linkUrl = `/connections`
             const text = `${user.firstName + " " + user.lastName} accepted your connection request.`
             const targetUserId = request.fromUserId._id;
             sendPushNotification(targetUserId,title, text, linkUrl);
@@ -35,7 +37,20 @@ const Requests = () => {
     }
 
 
-    const mutation = useMutation({mutationFn: handleRequest, onSuccess: () => queryClient.invalidateQueries({ queryKey: ['requests'] })});
+    const mutation = useMutation({
+        mutationKey: ['request'],
+        mutationFn: handleRequest,
+        onSuccess: (variables) => {
+            queryClient.setQueryData(['requests'], (old) => ({
+                ...old,
+                data: old.data.filter(req => req._id !== variables.request._id)
+            }));
+        },
+        onError: (err) => {
+            console.error('Error handling request:', err);
+            toast.error("error handling request");
+        },
+    });
 
     // const getRequests = async () => {
     //     try {
@@ -56,7 +71,7 @@ const Requests = () => {
     //         console.log(res);
     //         if(status === "accepted"){
     //             const title = "connection request accepted.";
-    //             const linkUrl = `${FRONTEND_BASE_URL}/connections`
+    //             const linkUrl = `/connections`
     //             const text = `${user.firstName + " " + user.lastName} accepted your connection request.`
     //             const targetUserId = request.fromUserId._id;
     //             sendPushNotification(targetUserId,title, text, linkUrl);
@@ -70,6 +85,7 @@ const Requests = () => {
     return (
         <div className=''>
             <h1 className='text-3xl text-center my-4' >Requests</h1>
+            <p className='mt-5  text-center'>{isLoading ? "Loading requests..." : ""}</p>
             <p className='mt-5  text-center'>{data?.data == "" ? "no requests available" : ""}</p>
             <ul className="list bg-base-100 rounded-box shadow-md min-h-[75vh] ">
     
@@ -79,10 +95,10 @@ const Requests = () => {
                     <li  className="list-row  flex gap-2 m-2 md:px-10 bg-base-200 p-4 mx-auto rounded-lg w-full md:w-2/3 lg:w-1/2 justify-between">
                         <div className='flex gap-2'>
     
-                        <div><img className="size-10 rounded-box" src={request.fromUserId.photoUrl}/></div>
+                        <div><img className="size-10 rounded-box" src={request.fromUserId?.photoUrl}/></div>
                         <div>
-                        <div className='text-xl' >{request.fromUserId.firstName + " " + request.fromUserId.lastName}</div>
-                        <div className="text-xs uppercase font-semibold opacity-60">{request.fromUserId.about}</div>
+                        <div className='text-xl' >{request.fromUserId?.firstName + " " + request.fromUserId?.lastName}</div>
+                        <div className="text-xs uppercase font-semibold opacity-60">{request.fromUserId?.about}</div>
                         </div>
                         </div>
     

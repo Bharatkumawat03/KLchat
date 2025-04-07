@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { getFirebaseToken } from "../utils/firebase";
-import { loginApi, signupApi } from "../utils/api";
+import { postApi } from "../utils/api";
 // import { toast } from "react-toastify";
 
 const Login = () => {
@@ -32,7 +32,7 @@ const Login = () => {
 
   const handleSignup = async () => {
     try {
-        const res = await signupApi({firstName, lastName, emailId, password});
+        const res = await postApi("/signup", {firstName, lastName, emailId, password});
         dispatch(addUser(res.data));
         // console.log(res.data);
         navigate("/");
@@ -48,7 +48,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-        const res = await loginApi({emailId, password});
+        const res = await postApi("/login", {emailId, password});
         console.log(res.data);
         dispatch(addUser(res.data));
         navigate("/");

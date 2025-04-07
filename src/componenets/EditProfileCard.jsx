@@ -3,7 +3,7 @@ import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice';
 import { toast } from 'react-toastify';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { editProfile } from '../utils/api';
+import { patchApi } from '../utils/api';
 
 const EditProfileCard = ({user}) => {
     const [firstName, setFirstName] = useState(user?.firstName || "");
@@ -15,12 +15,22 @@ const EditProfileCard = ({user}) => {
     const queryClient = useQueryClient();
 
     const handelEdit = async ({firstName,lastName,about,photoUrl}) => {
-      const res = await editProfile({firstName,lastName,about,photoUrl});
+      const res = await patchApi('/profile/edit',{firstName,lastName,about,photoUrl});
       toast.success("Profile updated successfully !!");
       return res.data;
     }
 
-    const mutation = useMutation({mutationFn: handelEdit, onSuccess: () => queryClient.invalidateQueries({queryKey: ["user"]})});
+    const mutation = useMutation({
+      mutationFn: handelEdit,
+      onError: (error) => {
+        console.error("edit profile mutation failed", error.message);
+        toast.error(error.response.data);
+      },
+      onSuccess: (data) => queryClient.setQueryData(["user"], (old) => {
+        if(old) return {...old, ...data};
+        return data;
+      })
+    });
 
     // const handleEdit = async () => {
     //     try {

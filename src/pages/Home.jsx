@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { FRONTEND_BASE_URL } from '../utils/constants'
 import { useDispatch, useSelector } from 'react-redux'
 import { removeFeed, setFeed } from '../utils/feedSlice'
 import { sendPushNotification } from '../utils/notification'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useInView } from 'react-intersection-observer'
-import { getFeedData, sendRequest } from '../utils/api'
+import { getApiData, postApi } from '../utils/api'
 
 const Home = () => {
     // const dispatch = useDispatch()
@@ -32,7 +31,7 @@ const Home = () => {
     // },[]);
 
      const getFeed = async ({pageParam}) => {
-        const {data} = await getFeedData({pageParam});
+        const {data} = await getApiData("/feed?page="+ pageParam);
         return data;
       }
     
@@ -47,9 +46,10 @@ const Home = () => {
           if (!lastPage || lastPage?.data?.length === 0) return undefined;
           return allPages.length + 1;
         },
+        refetchOnWindowFocus: false,
       })
-      console.log("infinite feed data", data?.pages[0]?.data);
-      console.log("infinite feed data 2 ", data);
+      // console.log("infinite feed data", data?.pages[0]?.data);
+      // console.log("infinite feed data 2 ", data);
 
       useEffect(() => {
         if(inView && hasNextPage && !isFetching && !isFetchingNextPage) {
@@ -59,19 +59,36 @@ const Home = () => {
 
 
       const handleRequest = async ({touser, status}) => {
-        const res = await sendRequest({touser, status});
+        const res = await postApi(`/request/send/${status}/${touser._id}`, {});
         if(status === "interested"){
           const title = "New connection request.";
-          const linkUrl = `${FRONTEND_BASE_URL}/requests`
+          const linkUrl = `/requests`
           const text = `${user.firstName + " " + user.lastName} send connection request.`
           const targetUserId = res.data.data.toUserId;
           sendPushNotification(targetUserId,title, text, linkUrl);
         }
-        console.log(res.data);
+        // console.log(res.data);
         return res.data;
       }
 
-      const mutation = useMutation({mutationFn : handleRequest, onSuccess: () => queryClient.invalidateQueries({queryKey: ["feed"]})})
+      const mutation = useMutation({
+        mutationKey: ["feed"],
+        mutationFn: handleRequest,
+        onError: (error) => {
+                console.error("sending request mutation failed", error.message);
+                toast.error("error sending request");
+        },
+        onSuccess: (variables) => {
+          queryClient.setQueryData(["feed"], (old) => ({
+            pages: old?.pages.map((page) => ({
+              ...page,
+              data: page.data.filter((item) => item?._id !== variables.touser?._id),
+            })),
+            pageParams: old.pageParams,
+          }));
+        },
+      });
+      
 
     // const handleRequest = async (touser,status) => {
     //     try {
@@ -79,7 +96,7 @@ const Home = () => {
     //         // console.log(res.data.data);
     //         if(status === "interested"){
     //           const title = "New connection request.";
-    //           const linkUrl = `${FRONTEND_BASE_URL}/requests`
+    //           const linkUrl = `/requests`
     //           const text = `${user.firstName + " " + user.lastName} send connection request.`
     //           const targetUserId = res.data.data.toUserId;
     //           sendPushNotification(targetUserId,title, text, linkUrl);

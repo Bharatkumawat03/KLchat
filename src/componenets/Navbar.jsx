@@ -3,7 +3,7 @@ import { isCookie, Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { removeUser } from "../utils/userSlice";
 import { toast } from "react-toastify";
-import { logoutApi, saveFcmToken } from "../utils/api";
+import { postApi } from "../utils/api";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -12,9 +12,9 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         try {
-          const ress = await saveFcmToken({ fcmToken: "" });
+          const ress = await postApi('/save-token',{ fcmToken: "" });
           console.log('fcmToken removed', ress.data);
-            const res = await logoutApi();
+            const res = await postApi("/logout", {});
             // console.log(res);
             localStorage.clear();
             dispatch(removeUser());
