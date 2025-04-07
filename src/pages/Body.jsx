@@ -137,11 +137,10 @@ const Body = () => {
             pauseOnHover: true,
             draggable: true,
             onClick: () => {
-              const link = notification?.data?.click_action;
-              if (link) {
-                window.location.href = link;
+              if (notification?.data && notification.data.click_action) {
+                window.location.href = notification.data.click_action;
               } else {
-                console.error("click_action is undefined");
+                console.log("No click_action provided in notification");
               }
             },
           }
