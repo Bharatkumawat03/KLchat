@@ -105,9 +105,9 @@ const VideoCall = () => {
         // sendPushNotification(targetUserId, title, text, linkUrl);
       
       } catch (err) {
-        console.error("Media error:", err);
-        setStatus(`Error: ${err.message}`);
-        alert(`Could not access camera/microphone: ${err.message}`);
+        console.error("media error", err);
+        setStatus(`error ${err.message}`);
+        alert(`could not access camera/microphone, ${err.message}`);
       }
     }
     
@@ -129,7 +129,7 @@ const VideoCall = () => {
       
       if (!isForUs && !isFromTarget) return;
       
-      console.log("Signal:", event.type);
+      console.log("signal", event.type);
       
       switch (event.type) {
         case "join":
@@ -138,7 +138,7 @@ const VideoCall = () => {
             const ourTime = Date.now();
             
             const initiator = ourTime - theirTime > 2000 ? false : true;
-            console.log(`Join timestamps - theirs: ${theirTime}, ours: ${ourTime}, I am ${initiator ? 'initiator' : 'receiver'}`);
+            console.log(`join timestamps - theirs: ${theirTime}, ours: ${ourTime}, I am ${initiator ? 'initiator' : 'receiver'}`);
             setIsInitiator(initiator);
 
             if (callTimeout.current) {
@@ -189,7 +189,7 @@ const VideoCall = () => {
     };
     
     callTimeout.current = setTimeout(() => {
-      console.log("Receiver did not join. Hanging up.");
+      console.log("receiver did not join. Hanging up.");
       setStatus("Receiver did not join");
       endCall(true);
       toast("Call ended: Receiver did not join",{

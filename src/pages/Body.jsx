@@ -136,7 +136,7 @@ const Body = () => {
             pauseOnHover: true,
             draggable: true,
             onClick: () => {
-              const link = notification.data.data.click_action;
+              const link = notification.data.click_action;
               window.location.href = link;
             },
           }
