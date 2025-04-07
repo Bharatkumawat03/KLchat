@@ -123,6 +123,7 @@ const Body = () => {
         }
       }
       else{
+        console.log("Notification link", notification?.data?.click_action);
         toast(
           <div>
             <strong>{notification.data.title}</strong>
@@ -137,7 +138,11 @@ const Body = () => {
             draggable: true,
             onClick: () => {
               const link = notification?.data?.click_action;
-              window.location.href = link;
+              if (link) {
+                window.location.href = link;
+              } else {
+                console.error("click_action is undefined");
+              }
             },
           }
         );
